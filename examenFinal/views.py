@@ -1,7 +1,9 @@
+from ast import Pass
 from django.shortcuts import render
 from django.urls import reverse
 from .models import tareasExamen, usuariosFinal
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse,HttpResponseRedirect ,JsonResponse
+import json
 
 # Create your views here.
 def index(request):
@@ -28,3 +30,38 @@ def dashboard(request):
     return render(request,'examenFinal/dashboard.html',{
         'tareas_totales':tareasExamen.objects.all().order_by('id')
     })
+
+def obtener_info_tarea(request):
+    id_tarea=str(request.GET.get('id'))
+    tarea=tareasExamen.objects.get(id=id_tarea)
+    return JsonResponse({
+        'tarea_detalle':{
+            'id' : tarea.id ,
+            'fechaCreacion' : tarea.fechaCreacion ,
+            'fechaEntrega' : tarea.fechaEntrega,
+            'descripcion' : tarea.descripcion ,
+            'estadoTarea' : tarea.estadoTarea 
+        }
+    })
+
+    
+    
+
+
+def eliminar_tarea(request,ind):
+    usuario_eliminar = usuariosFinal.objects.get(id=ind)
+    if usuario_eliminar.usuario.username == 'admin':
+        return HttpResponseRedirect(reverse('usuarios'))
+    else:
+        usuario_eliminar.usuario.delete()
+        usuario_eliminar.delete()
+        return HttpResponseRedirect(reverse('usuarios'))
+
+def actualizar_tarea(request,ind):
+    usuario_eliminar = usuariosFinal.objects.get(id=ind)
+    if usuario_eliminar.usuario.username == 'admin':
+        return HttpResponseRedirect(reverse('usuarios'))
+    else:
+        usuario_eliminar.usuario.delete()
+        usuario_eliminar.delete()
+        return HttpResponseRedirect(reverse('usuarios'))

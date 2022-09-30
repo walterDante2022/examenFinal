@@ -32,8 +32,45 @@
             */
            function mostrarDetalle(id_tarea)
            {
-            console.log(id_tarea)
-           }
+            //console.log(id_tarea)
+
+            fetch(`/examenFinal/obtener_info_tarea?id=${id_tarea}`)
+                .then(response=>response.json())
+                .then(data=> {
+                    console.log(data)
+                    let modal_detalle=document.querySelector('.modalDetalle')
+                    let info_detalle=data.tarea_detalle
+                    let nuevoElementos = `
+                            <table class ="table table-stripped">
+                                <thead class="table-dark">
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">Fecha de creacion</th>
+                                            <th scope="col">Fecha de entrega</th>
+                                            <th scope="col">Descripcion</th>
+                                            <th scope="col">Estado de la tarea</th>
+                                            
+                                        
+                                        </tr>
+                                </thead>
+                            <tbody>
+                        
+                                    <tr>
+                                        <td class="modal_detalle">${info_detalle.id }</td>
+                                        <td class="modal_detalle">${info_detalle.fechaCreacion }</td>
+                                        <td class="modal_detalle">${info_detalle.fechaEntrega }</td>
+                                        <td class="modal_detalle">${info_detalle.descripcion }</td>
+                                        <td class="modal_detalle">${info_detalle.estadoTarea } </td>
+                                    </tr>
+                            
+                            </tbody>
+                        </table>
+
+                        `
+                        modal_detalle.innerHTML = nuevoElementos         
+
+           })
+        }
 
            /*
            Para eliminar la informacion al interior de la ventana mostrar detalle capturar los elementos
@@ -45,6 +82,11 @@
            function eliminarDetalle()
            {
             console.log('Funcion para eliminar el HTML interior de la ventana')
+
+            let tabla_informacion = document.querySelector('#infoUsuarios')
+                
+
+
            }
 
            //PREGUNTA 2-1
@@ -126,6 +168,7 @@
             <table class="table table-bordered table-hover" style="font-size: 12px;">
                 <thead class="table-dark">
                     <tr>
+                        <th scope="col">ID</th>
                         <th scope="col">Fecha de creacion</th>
                         <th scope="col">Fecha de entrega</th>
                         <th scope="col">Estado de la tarea</th>
@@ -137,12 +180,13 @@
                 <tbody>
                 {% for tarea in tareas_totales %}
                 <tr>
+                    <td id="id_tarea">{{ tarea.id }}</td>
                     <td scope="row">{{ tarea.fechaCreacion }}</td>
                     <td>{{ tarea.fechaEntrega }}</td>
                     <td>{{ tarea.estadoTarea }}</td>
-                    <td style="text-align: center;"><a id="detalle{{ tarea.id }}" class="btn btn-info" style="color: black;" data-bs-toggle="modal" data-bs-target="#verDetalle" onclick="mostrarDetalle(this.id)"><i class="fa fa-eye"></i></a></td>
-                    <td style="text-align: center;"><a id="editar{{ tarea.id }}" class="btn btn-warning" style="color: black;" data-bs-toggle="modal" data-bs-target="#editarTarea" onclick="editarTarea(this.id)"><i class="fa fa-edit"></i></a></td>
-                    <td style="text-align: center;"><a id="eliminar{{ tarea.id }}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(this.id)"><i class="fa fa-trash"></i></a></td>
+                    <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-info" style="color: black;" data-bs-toggle="modal" data-bs-target="#verDetalle" onclick="mostrarDetalle(this.id)"><i class="fa fa-eye"></i></a></td>
+                    <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-warning" style="color: black;" data-bs-toggle="modal" data-bs-target="#editarTarea" onclick="editarTarea(this.id)"><i class="fa fa-edit"></i></a></td>
+                    <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(this.id)"><i class="fa fa-trash"></i></a></td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -166,6 +210,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="eliminarNuevo()"></button>
             </div>
             <div class="modal-body">
+                <div class="modalNuevo">
+                        
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="eliminarNuevo()">Cancelar</button>
@@ -192,6 +239,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="modalEditar">
+                        
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -216,9 +266,15 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Detalle de la tarea</h5>
+                <br>
+                    
+                    <br>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="eliminarDetalle()"></button>
             </div>
             <div class="modal-body">
+                <div class="modalDetalle">
+                        
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="eliminarDetalle()">Cerrar</button>
