@@ -41,8 +41,8 @@
                     let modal_detalle=document.querySelector('.modalDetalle')
                     let info_detalle=data.tarea_detalle
                     let nuevoElementos = `
-                            <table class ="table table-stripped">
-                                <thead class="table-dark">
+                            <table class ="table align-middle mb-0 bg-white">
+                                <thead class="bg-light"">
                                         <tr>
                                             <th scope="col">ID</th>
                                             <th scope="col">Fecha de creacion</th>
@@ -64,11 +64,8 @@
                                     </tr>
                             
                             </tbody>
-                        </table>
-
-                        `
+                        </table>   `
                         modal_detalle.innerHTML = nuevoElementos         
-
            })
         }
 
@@ -83,7 +80,11 @@
            {
             console.log('Funcion para eliminar el HTML interior de la ventana')
 
-            let tabla_informacion = document.querySelector('#infoUsuarios')
+            let tabla_detalle = document.querySelectorAll('.modal_detalle')
+            console.log(tabla_detalle)
+            for (let i = 0; i < tabla_detalle.length; i++) {
+                tabla_detalle[i].innerHTML = ""
+            }
                 
 
 
@@ -104,11 +105,118 @@
            {
             console.log('Crear nueva tarea')
             //Escribir su codigo aqui
+            let Ventana_NuevaTarea = document.querySelector('.modal_nuevaTarea')
+            let creado_nueva_tarea = `
+            <div class="container">
+                <div class="row">
+                    <div class="container col-md-8">
+                            <div class="controls">
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label for="form_email">Fecha de creación</label>
+                                            <input id="fechaCreacionNuevo" type="text" class="form-control" name="fechaCreacion">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label for="form_phone">Fecha de entrega</label>
+                                            <input id="fechaEntregaNuevo" type="text" class="form-control" name="fechaEntrega">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-outline mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label>Descripción de la tarea</label>
+                                            <input id="nombreTareaNuevo" type="text" class="form-control" name="nombreTarea">
+                                        
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-outline mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label>Estado de la tarea</label>
+                                            <input id="estadoTareaNuevo" type="text"  class="form-control" name="estadoTarea">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+                `
+            Ventana_NuevaTarea.innerHTML = creado_nueva_tarea
 
             //Fin del codigo
-            $(".modal-backdrop").remove();
-            $('#nuevaTarea').hide()
+           // $(".modal-backdrop").remove();
+           // $('#nuevaTarea').hide()
            }
+
+           function agregarTarea()
+           {
+            let nombreTarea = document.getElementById('nombreTareaNuevo').value
+            let fechaCreacion = document.getElementById('fechaCreacionNuevo').value
+            let fechaEntrega = document.getElementById('fechaEntregaNuevo').value
+            let estadoTarea = document.getElementById('estadoTareaNuevo').value
+
+            informacion_tarea = {
+                'descripcion':`${nombreTarea}`,
+                'fechaCreacion':`${fechaCreacion}`,
+                'fechaEntrega':`${fechaEntrega}`,
+                'estadoTarea':`${estadoTarea}`
+            }
+            console.log(informacion_tarea)
+
+            fetch(`/examenFinal/guardarTarea`,{
+                method:'POST',
+                headers:{
+                    "X-Request-With":"XMLHttpRequest",
+                    "X-CSRFToken":getCookie("csrftoken")
+                },
+                body:JSON.stringify(informacion_tarea)
+            })
+            .then(response => response.json())
+            .then(data=>{
+                console.log(data)
+                let info_tarea = data.tarea
+                let nueva_fila = `
+                <tr>
+                    <td scope="row">${info_tarea[1]}</td>
+                    <td>${info_tarea[2]}</td>
+                    <td>${info_tarea[4]}</td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-info" style="color: black;" data-bs-toggle="modal" data-bs-target="#verDetalle" onclick="mostrarDetalle(this.id)"><i class="fa fa-eye"></i></a></td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-warning" style="color: black;" data-bs-toggle="modal" data-bs-target="#editarTarea" onclick="editarTarea(this.id)"><i class="fa fa-edit"></i></a></td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(this.id)"><i class="fa fa-trash"></i></a></td>
+                </tr>
+                `
+                let tabla_tareas = document.querySelector('#tabla_tareas')
+                tabla_tareas.innerHTML += nueva_fila
+            })
+            }
+
+            //Funcion para obtener token CSRF
+            function getCookie(name)
+            {
+                let cookieValue = null
+                if (document.cookie && document.cookie !== "")
+                {
+                    const cookies = document.cookie.split(';')
+                    for (let i = 0; i < cookies.length; i++)
+                    {
+                        const cookie = cookies[i].trim()
+                        if (cookie.substring(0,name.length + 1) == (name + "="))
+                        {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+                        }
+                    }
+                }
+                return cookieValue
+            }
 
            /*
            Capturar los input de la ventana modal para nuevaTarea y eliminar el valor al interior de 
@@ -129,7 +237,26 @@
            */
            function eliminarTarea(id_tarea)
            {
-            console.log(id_tarea)
+            
+            //console.log(id_tarea)
+            fetch(`/examenFinal/eliminarTarea?id=${id_tarea}`)
+            .then(response => response.json())
+            .then(data=>{
+                alert('Tarea eliminada')
+                let info_tarea = data.eliminar_tarea
+                let fila_eliminar = `
+                <tr>
+                    <td scope="row">${info_tarea[1]}</td>
+                    <td>${info_tarea[2]}</td>
+                    <td>${info_tarea[4]}</td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-info" style="color: black;" data-bs-toggle="modal" data-bs-target="#verDetalle" onclick="mostrarDetalle(this.id)"><i class="fa fa-eye"></i></a></td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-warning" style="color: black;" data-bs-toggle="modal" data-bs-target="#editarTarea" onclick="editarTarea(this.id)"><i class="fa fa-edit"></i></a></td>
+                    <td style="text-align: center;"><a id="${info_tarea[0]}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(this.id)"><i class="fa fa-trash"></i></a></td>
+                </tr>
+                `
+                let tabla_tareas = document.querySelector('#tabla_tareas')
+                tabla_tareas.innerHTML = tabla_tareas.innerHTML.replace(fila_eliminar,'');
+            })
            }
 
            //PREGUNTA 2-3
@@ -160,7 +287,7 @@
             <h1>Tareas del examen final</h1>
             <br>
             <div>
-                <a class="btn btn-success float-start" style="color: white;" data-bs-toggle="modal" data-bs-target="#nuevaTarea">Nuevo<i class="fa fa-plus"></i></a>
+                <a class="btn btn-success float-start" style="color: white;" data-bs-toggle="modal" data-bs-target="#nuevaTarea" onclick="nuevaTarea()">Nueva Tarea<i class="fa fa-plus"></i></a>
                 <a class="btn btn-success float-end" style="color: white;" href="{% url 'examenFinal:index' %}">Salir</a>
             </div>
             <br>
@@ -177,7 +304,7 @@
                         <th scope="col">Eliminar tarea</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tabla_tareas">
                 {% for tarea in tareas_totales %}
                 <tr>
                     <td id="id_tarea">{{ tarea.id }}</td>
@@ -186,7 +313,7 @@
                     <td>{{ tarea.estadoTarea }}</td>
                     <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-info" style="color: black;" data-bs-toggle="modal" data-bs-target="#verDetalle" onclick="mostrarDetalle(this.id)"><i class="fa fa-eye"></i></a></td>
                     <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-warning" style="color: black;" data-bs-toggle="modal" data-bs-target="#editarTarea" onclick="editarTarea(this.id)"><i class="fa fa-edit"></i></a></td>
-                    <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(this.id)"><i class="fa fa-trash"></i></a></td>
+                    <td style="text-align: center;"><a id="{{ tarea.id }}" class="btn btn-danger" style="color: white;" onclick="eliminarTarea(id)"><i class="fa fa-trash"></i></a></td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -210,13 +337,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="eliminarNuevo()"></button>
             </div>
             <div class="modal-body">
-                <div class="modalNuevo">
+                <div class="modal_nuevaTarea">
                         
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="eliminarNuevo()">Cancelar</button>
-                <button type="submit" class="btn btn-primary" onclick="nuevaTarea()">Agregar</button>
+                <button type="submit" class="btn btn-primary" onclick="agregarTarea()">Agregar</button>
             </div>
         </div>
     </div>
