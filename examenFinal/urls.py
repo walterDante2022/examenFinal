@@ -9,6 +9,6 @@ urlpatterns = [
     path('obtener_info_tarea',views.obtener_info_tarea, name='obtener_info_tarea'),
     path('guardarTarea',views.guardarTarea,name='guardarTarea'),
     path('eliminarTarea',views.eliminarTarea,name='eliminarTarea'),
-
-    path('actualizar_tarea',views.actualizar_tarea,name='actualizar_tarea'),
+    path('editarTarea',views.editarTarea,name='editarTarea'),
+    path('actualizarTarea',views.actualizarTarea,name='actualizarTarea'),
 ]

@@ -74,11 +74,38 @@ def eliminarTarea(request):
         'eliminar_tarea':tarea_eliminar_lista
     })
 
-def actualizar_tarea(request,ind):
-    usuario_eliminar = usuariosFinal.objects.get(id=ind)
-    if usuario_eliminar.usuario.username == 'admin':
-        return HttpResponseRedirect(reverse('usuarios'))
-    else:
-        usuario_eliminar.usuario.delete()
-        usuario_eliminar.delete()
-        return HttpResponseRedirect(reverse('usuarios'))
+def editarTarea(request):
+    id_tarea = str(request.GET.get('id'))
+    tarea = tareasExamen.objects.get(id=id_tarea)
+    return JsonResponse({
+        'editar_tarea': {
+            'id': tarea.id,
+            'fechaCreacion': tarea.fechaCreacion,
+            'fechaEntrega': tarea.fechaEntrega,
+            'descripcion': tarea.descripcion,
+            'estadoTarea': tarea.estadoTarea
+        }
+    })
+
+
+def actualizarTarea(request):
+    informacion_tarea = json.load(request)
+    id = informacion_tarea.get('id')
+    descripcion = informacion_tarea.get('descripcion')
+    fechaCreacion = informacion_tarea.get('fechaCreacion')
+    fechaEntrega = informacion_tarea.get('fechaEntrega')
+    estadoTarea = informacion_tarea.get('estadoTarea')
+    print(id)
+    print(descripcion)
+    print(fechaCreacion)
+    print(fechaEntrega)
+    print(estadoTarea)
+    tarea_editar = tareasExamen.objects.get(id=id)
+    tarea_editar.descripcion = descripcion
+    tarea_editar.fechaCreacion = fechaCreacion
+    tarea_editar.fechaEntrega = fechaEntrega
+    tarea_editar.estadoTarea = estadoTarea
+    tarea_editar.save()
+    return JsonResponse({
+        'mensaje':'Tarea actualizada'
+    })

@@ -151,10 +151,9 @@
             </div>
                 `
             Ventana_NuevaTarea.innerHTML = creado_nueva_tarea
-
             //Fin del codigo
            // $(".modal-backdrop").remove();
-           // $('#nuevaTarea').hide()
+           //$('#nuevaTarea').hide()
            }
 
            function agregarTarea()
@@ -182,7 +181,8 @@
             })
             .then(response => response.json())
             .then(data=>{
-                console.log(data)
+                //console.log(data)
+                alert('Tarea se esta inseriendo correctamente..!!')
                 let info_tarea = data.tarea
                 let nueva_fila = `
                 <tr>
@@ -224,6 +224,10 @@
            */
            function eliminarNuevo()
            {
+            let nuevaTarea_campos = document.querySelectorAll('.form-control')
+            for (let i = 0; i < nuevaTarea_campos.length; i++) {
+                nuevaTarea_campos[i].innerHTML = ""
+            }
 
            }
 
@@ -273,9 +277,98 @@
            {
             console.log(id_tarea)
             //El codigo inicia aqui
+            fetch(`/examenFinal/editarTarea?id=${id_tarea}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Editar tarea')
+                console.log(data)
+                let info_editar = data.editar_tarea
+                let modal_editarTarea = document.querySelector('.modalEditar')
+                let elemento_editar = `
+                <div class="container">
+                <div class="row">
+                    <div class="container col-md-8">
+                            <div class="controls">
+                                <div>
+                                <input value="${id_tarea}" id="idTarea" type="hidden">
+                                </div>
+                                <div class="row mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label for="form_email">Fecha de creación</label>
+                                            <input id="fechaCreacionEditar" value="${info_editar.fechaCreacion}" type="text" class="form-control" name="fechaCreacion">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label for="form_phone">Fecha de entrega</label>
+                                            <input id="fechaEntregaEditar" value="${info_editar.fechaEntrega}" type="text" class="form-control" name="fechaEntrega">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-outline mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label>Descripción de la tarea</label>
+                                            <input id="nombreTareaEditar" value="${info_editar.descripcion}"  type="text" class="form-control" name="nombreTarea">
+                                        
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-outline mb-4">
+                                    <div class="col">
+                                        <div class="form-outline">
+                                            <label>Estado de la tarea</label>
+                                            <input id="estadoTareaEditar" value="${info_editar.estadoTarea}" type="text"  class="form-control" name="estadoTarea">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div> 
+                ` 
+                modal_editarTarea.innerHTML = elemento_editar
 
+                })
             //Fin del codigo
            }
+           function actualizarTarea()
+         {
+            let id_tarea = document.getElementById('idTarea').value
+            console.log(id_tarea)
+            let nombreTarea = document.getElementById('nombreTareaEditar').value
+            let fechaCreacion = document.getElementById('fechaCreacionEditar').value
+            let fechaEntrega = document.getElementById('fechaEntregaEditar').value
+            let estadoTarea = document.getElementById('estadoTareaEditar').value
+            console.log(estadoTarea)
+
+            informacion_tarea = {
+                'id': id_tarea,
+                'descripcion':`${nombreTarea}`,
+                'fechaCreacion':`${fechaCreacion}`,
+                'fechaEntrega':`${fechaEntrega}`,
+                'estadoTarea':`${estadoTarea}`
+            }
+            console.log(informacion_tarea)
+
+            fetch(`/examenFinal/actualizarTarea`,{
+                method:'POST',
+                headers:{
+                    "X-Request-With":"XMLHttpRequest",
+                    "X-CSRFToken":getCookie("csrftoken")
+                },
+                body:JSON.stringify(informacion_tarea)
+            })
+            .then(response => response.json())
+            .then(data => { console.log(data)
+                window.location.reload()
+                })
+            
+        }
 
         </script>
 
@@ -287,7 +380,7 @@
             <h1>Tareas del examen final</h1>
             <br>
             <div>
-                <a class="btn btn-success float-start" style="color: white;" data-bs-toggle="modal" data-bs-target="#nuevaTarea" onclick="nuevaTarea()">Nueva Tarea<i class="fa fa-plus"></i></a>
+                <a class="btn btn-success float-start" style="color: white;" onclick="nuevaTarea()" data-bs-toggle="modal" data-bs-target="#nuevaTarea" >Nueva Tarea<i class="fa fa-plus"></i></a>
                 <a class="btn btn-success float-end" style="color: white;" href="{% url 'examenFinal:index' %}">Salir</a>
             </div>
             <br>
@@ -295,7 +388,7 @@
             <table class="table table-bordered table-hover" style="font-size: 12px;">
                 <thead class="table-dark">
                     <tr>
-                        <th scope="col">ID</th>
+                      <!--  <th scope="col">ID</th>-->
                         <th scope="col">Fecha de creacion</th>
                         <th scope="col">Fecha de entrega</th>
                         <th scope="col">Estado de la tarea</th>
@@ -307,7 +400,7 @@
                 <tbody id="tabla_tareas">
                 {% for tarea in tareas_totales %}
                 <tr>
-                    <td id="id_tarea">{{ tarea.id }}</td>
+                    <!--<td id="id_tarea">{{ tarea.id }}</td>-->
                     <td scope="row">{{ tarea.fechaCreacion }}</td>
                     <td>{{ tarea.fechaEntrega }}</td>
                     <td>{{ tarea.estadoTarea }}</td>
@@ -371,8 +464,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Actualizar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="eliminarNuevo()"   >Cancelar</button>
+                <button type="submit" class="btn btn-primary" onclick="actualizarTarea()" >Actualizar</button>
             </div>
         </div>
     </div>
